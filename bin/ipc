@@ -1,0 +1,94 @@
+#!/usr/bin/env bash
+
+command="$1"
+pids=()
+
+killpids () {
+  for pid in "${pids[@]}"; do
+    kill -TERM "$pid" 2>/dev/null
+  done
+
+  for pid in "${pids[@]}"; do
+    kill -9 "$pid" 2>/dev/null
+  done
+}
+
+onsigterm () {
+  killpids
+  exit 0
+}
+
+decode_uri_component () {
+  echo -e "$(echo "$@" | sed -E 's/%([0-9a-fA-F]{2})/\\x\1/g;s/\+/ /g')"
+}
+
+io () {
+  {
+    if [ "$command" != "send" ] && [ "$command" != "stdout" ]; then
+      while true; do
+        if read -r line < /tmp/opfifo-stdin; then
+          # shellcheck disable=SC2155
+          local protocol="$(echo "$line" | grep :// | sed 's/^\(.*:\/\/\).*/\1/g')"
+          # shellcheck disable=SC2001,SC2155
+          local url="$(echo "$line" | sed "s,$protocol,,g")"
+          # shellcheck disable=SC2001,SC2155
+          local cmd=$(echo "$url" | sed 's/?.*$//g')
+
+          if [ "$cmd" != "resolve" ]; then
+            echo >&2 "error: Invalid command in response: '$cmd'"
+            exit 1
+          fi
+
+          # shellcheck disable=SC2207
+          local args=($(decode_uri_component "$(echo "$url" | sed "s,$cmd?,,g" | sed 's/&/ /g')"))
+
+          for arg in "${args[@]}"; do
+            # shellcheck disable=SC2207
+            local kv=($(echo -ne "$arg" | sed 's/=/ /g'))
+            local key="${kv[0]}"
+            local value="${kv[1]}"
+
+            if [ "$key" == "value" ]; then
+              echo "$value"
+              break
+            fi
+          done
+
+          exit
+        fi
+      done
+    fi
+  } &
+
+  pids+=($!)
+}
+
+init () {
+  {
+    {
+      printf "ipc://%s?" "$1"
+      shift
+      while (( $# > 0 )); do
+        printf "%s" "$1"
+        shift
+        if (( $# > 0 )); then
+          printf "&"
+        fi
+      done
+      echo
+    } > /tmp/opfifo-stdout
+  } &
+
+  pids+=($!)
+}
+
+signals () {
+  trap onsigterm SIGTERM SIGINT
+}
+
+signals || return $?
+# shellcheck disable=SC2068
+init $@ || return $?
+io || return $?
+
+wait

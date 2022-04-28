@@ -1,0 +1,23 @@
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>Bash Hello World</title>
+    <style type="text/css" media="all">
+      body {
+        background: white;
+      }
+    </style>
+    <script charset="utf-8" type="text/javascript">
+      window.addEventListener('refresh', () => { window.location.reload() })
+      window.addEventListener('data', ({ detail }) => {
+        console.log(detail)
+        const pre = document.getElementById('message')
+        pre.textContent = JSON.stringify(detail, null, ' ')
+      })
+    </script>
+  </head>
+  <body>
+    Hello, World from Bash!
+    <pre id="message"></pre>
+  </body>
+</html>
