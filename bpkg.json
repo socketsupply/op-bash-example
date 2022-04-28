@@ -1,0 +1,19 @@
+{
+  "name": "op-bash-example",
+  "version": "0.0.0",
+  "description": "Operator Framework Bash backend example",
+  "license": "MIT",
+  "scripts": [
+    "bin/ipc",
+    "bin/watch",
+    "src/main.sh",
+    "build.sh"
+  ],
+  "files": [
+    "operator.config",
+    "src/index.html",
+    "LICENSE",
+    "README.md"
+  ]
+}
+
