@@ -62,7 +62,7 @@ bin/ipc navigate 'window=0' "value=file://$PWD/src/index.html"
 bin/ipc send 'window=0' 'event=data' 'value={"hello":"world"}'
 ```
 
-## Development (live reaload)
+## Development (live reload)
 
 ```sh
 bin/watch
