@@ -3,6 +3,14 @@
   "version": "0.0.0",
   "description": "Operator Framework Bash backend example",
   "license": "MIT",
+  "commands": {
+    "lint": "command shellcheck build.sh bin/* src/*.sh",
+    "build": "op .",
+    "start": "op . -r -o",
+    "clean": "rm -rf build/",
+    "watch": "bin/watch",
+    "ipc": "bin/ipc $@"
+  },
   "scripts": [
     "bin/ipc",
     "bin/watch",

@@ -18,6 +18,22 @@ onsigterm () {
   exit 0
 }
 
+encode_uri_component () {
+  local string="$1"
+  local length=${#string}
+  local char=""
+  local i
+
+  for (( i = 0 ; i < length ; i++ )); do
+    char=${string:$i:1}
+
+    case "$char" in
+      [-_.~a-zA-Z0-9]) echo -ne "$char" ;;
+      *) printf '%%%02x' "'$char" ;;
+    esac
+  done
+}
+
 decode_uri_component () {
   echo -e "$(echo "$@" | sed -E 's/%([0-9a-fA-F]{2})/\\x\1/g;s/\+/ /g')"
 }
@@ -26,7 +42,7 @@ io () {
   {
     if [ "$command" != "send" ] && [ "$command" != "stdout" ]; then
       while true; do
-        if read -r line < /tmp/opfifo-stdin; then
+        if read -r line < /tmp/op-bash-stdin; then
           # shellcheck disable=SC2155
           local protocol="$(echo "$line" | grep :// | sed 's/^\(.*:\/\/\).*/\1/g')"
           # shellcheck disable=SC2001,SC2155
@@ -63,22 +79,37 @@ io () {
   pids+=($!)
 }
 
-init () {
+write () {
   {
-    {
-      printf "ipc://%s?" "$1"
-      shift
-      while (( $# > 0 )); do
-        printf "%s" "$1"
-        shift
-        if (( $# > 0 )); then
-          printf "&"
-        fi
-      done
-      echo
-    } > /tmp/opfifo-stdout
-  } &
+    # shellcheck disable=SC2059,SC2068
+    printf "ipc://%s?" "$1"
+    shift
+    local args=()
+    # shellcheck disable=SC2001,SC2207
+    IFS='&' read -r -d '' -a args < <(echo -ne "$@")
 
+    for (( i = 0; i < ${#args[@]}; ++i )); do
+      local arg="${args[$i]}"
+      local kv=()
+      IFS='=' read -r -d '' -a kv < <(echo -ne "$arg")
+
+      local key="${kv[0]}"
+      local value="${kv[1]}"
+
+      echo -ne "$key"
+      echo -ne '='
+      echo -ne "$(encode_uri_component "$(echo -ne "$value")")"
+      printf '&'
+    done
+
+    ## flush
+    echo
+  } > /tmp/op-bash-stdout
+}
+
+init () {
+  # shellcheck disable=SC2068
+  write $@ &
   pids+=($!)
 }
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-pidsfile="/tmp/opfifo-pids"
+pidsfile="/tmp/opbash-pids"
 dirname="$(dirname "$(realpath "${BASH_SOURCE[0]}")")"
 # shellcheck disable=SC2207
 pids=($(cat "$pidsfile" 2>/dev/null))
@@ -95,13 +95,13 @@ init () {
 
 io () {
   ## init fifo
-  rm -f /tmp/opfifo-{stdin,stdout}
-  mkfifo /tmp/opfifo-stdin
-  mkfifo /tmp/opfifo-stdout
+  rm -f /tmp/opbash-{stdin,stdout}
+  mkfifo /tmp/opbash-stdin
+  mkfifo /tmp/opbash-stdout
 
   {
     while true; do
-      if read -r line < /tmp/opfifo-stdout; then
+      if read -r line < /tmp/opbash-stdout; then
         echo "$line"
       fi
     done
@@ -113,7 +113,7 @@ io () {
 
   while read -r line; do
     log "Forwarding message to FIFO"
-    echo "$line" > /tmp/opfifo-stdin
+    echo "$line" > /tmp/opbash-stdin
   done
 }
 
