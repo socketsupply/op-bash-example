@@ -59,7 +59,7 @@ bin/ipc navigate 'window=0' "value=file://$PWD/src/index.html"
 ```
 
 ```sh
-bin/ipc send 'window=' 'event=data' 'value={"hello":"world"}'
+bin/ipc send 'window=0' 'event=data' 'value={"hello":"world"}'
 ```
 
 ## Development (live reaload)
