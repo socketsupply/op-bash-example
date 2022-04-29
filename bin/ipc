@@ -74,28 +74,30 @@ io () {
       while true; do
         if read -r line < /tmp/op-bash-stdin; then
           # shellcheck disable=SC2155
-          local protocol="$(echo "$line" | grep :// | sed 's/^\(.*:\/\/\).*/\1/g')"
+          local protocol="$(echo -e "$line" | grep :// | sed 's/^\(.*:\/\/\).*/\1/g')"
           # shellcheck disable=SC2001,SC2155
-          local url="$(echo "$line" | sed "s,$protocol,,g")"
+          local url="$(echo -e "$line" | sed "s,$protocol,,g")"
           # shellcheck disable=SC2001,SC2155
-          local cmd=$(echo "$url" | sed 's/?.*$//g')
+          local cmd=$(echo -e "$url" | sed 's/?.*$//g')
 
           if [ "$cmd" != "resolve" ]; then
-            echo >&2 "error: Invalid command in response: '$cmd'"
+            echo -e >&2 "error: Invalid command in response: '$cmd'"
+            echo -e >&2 "error: Got URL from IPC: '$url'"
             exit 1
           fi
 
           # shellcheck disable=SC2207
-          local args=($(decode_uri_component "$(echo "$url" | sed "s,$cmd?,,g" | sed 's/&/ /g')"))
+          local args=()
+          IFS='&' read -r -d '' -a args < <(decode_uri_component "$(echo -e "$url" | sed "s,$cmd?,,g")")
 
           for arg in "${args[@]}"; do
-            # shellcheck disable=SC2207
-            local kv=($(echo -ne "$arg" | sed 's/=/ /g'))
+            local kv=()
+            IFS='=' read -r -d '' -a kv < <(echo -ne "$arg")
             local key="${kv[0]}"
             local value="${kv[1]}"
 
             if [ "$key" == "value" ]; then
-              echo "$value"
+              echo -e "$value"
               break
             fi
           done

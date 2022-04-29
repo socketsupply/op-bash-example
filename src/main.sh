@@ -30,7 +30,7 @@
 # SPDX-FileCopyrightText: 2022 Socket Supply Co. <socketsupply.co>
 ##
 
-pidsfile="/tmp/opbash-pids"
+pidsfile="/tmp/op-bash-pids"
 dirname="$(dirname "$(realpath "${BASH_SOURCE[0]}")")"
 # shellcheck disable=SC2207
 pids=($(cat "$pidsfile" 2>/dev/null))
@@ -115,9 +115,8 @@ init () {
 
   ## init window
   write "show" "window=0"
-  write "title" "window=0&value=Hello from Bash"
-  write "navigate" "window=0&value=file://$dirname/index.html"
   write "menu" "window=0&value=$MENU"
+  write "navigate" "window=0&value=file://$dirname/index.html"
 
   ## kill previous pids
   killpids
@@ -125,13 +124,13 @@ init () {
 
 io () {
   ## init fifo
-  rm -f /tmp/opbash-{stdin,stdout}
-  mkfifo /tmp/opbash-stdin
-  mkfifo /tmp/opbash-stdout
+  rm -f /tmp/op-bash-{stdin,stdout}
+  mkfifo /tmp/op-bash-stdin
+  mkfifo /tmp/op-bash-stdout
 
   {
     while true; do
-      if read -r line < /tmp/opbash-stdout; then
+      if read -r line < /tmp/op-bash-stdout; then
         echo "$line"
       fi
     done
@@ -143,7 +142,7 @@ io () {
 
   while read -r line; do
     log "Forwarding message to FIFO"
-    echo "$line" > /tmp/opbash-stdin
+    echo "$line" > /tmp/op-bash-stdin
   done
 }
 
