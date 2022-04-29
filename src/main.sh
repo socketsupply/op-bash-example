@@ -64,19 +64,19 @@ killpids () {
 }
 
 encode_uri_component () {
-	local string="$1"
-	local length=${#string}
-	local char=""
-	local i
+  local string="$1"
+  local length=${#string}
+  local char=""
+  local i
 
-	for (( i = 0 ; i < length ; i++ )); do
-		char=${string:$i:1}
+  for (( i = 0 ; i < length ; i++ )); do
+    char=${string:$i:1}
 
-		case "$char" in
-			[-_.~a-zA-Z0-9]) echo -ne "$char" ;;
-			*) printf '%%%02x' "'$char" ;;
-		esac
-	done
+    case "$char" in
+      [-_.~a-zA-Z0-9]) echo -ne "$char" ;;
+      *) printf '%%%02x' "'$char" ;;
+    esac
+  done
 }
 
 write () {
