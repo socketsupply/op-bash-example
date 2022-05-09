@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 ##
 # `op-bash-example`
 #
@@ -28,33 +29,30 @@
 # SPDX-License-Identifier: MIT
 # SPDX-FileCopyrightText: 2022 Socket Supply Co. <socketsupply.co>
 ##
-## Metadata
-title: Operator Framework Bash Example
-description: A simple Operator Framework example written in Bash that makes use of POSIX Named Pipes for IPC request IO
-copyright: (c) 2022 Socket Supply Co.
-version: v0.0.1
-version_short: 0.0.1
 
-## Bundle output
-bundle_identifier: com.op-bash
-bundle_identifier_short: op-bash
+dirname="$(dirname "$(realpath "${BASH_SOURCE[0]}")")"
+root="$(dirname "$dirname")"
 
-## Build output
-name: op-bash
-executable: op-bash
-build: build.sh
-output: build
+IPC="$root/bin/ipc"
 
-## Compiler
-flags: -O1
-debug_flags: -g -O3
+buffer=()
+data=""
 
-## Window
-forward_console: true
-height: 750
-width: 1024
+## verify stdin is piped
+if [ -t 0 ]; then
+  echo >&2 "error: Command is not in pipe"
+  exit 1
+fi
 
-## Runtime
-linux_cmd: "main.sh"
-mac_cmd: "main.sh"
-win_cmd: "main.sh"
+## read stdin
+while read -r data; do
+  buffer+=("$data\n")
+done
+
+## encode `buffer`
+data="$(echo -e "${buffer[@]}" | base64 -w 0)"
+
+## send `terminal:stdin` event `data` to Window#0
+"$IPC" send event='terminal:stdin' index=0 "value=$data"
+
+exit $?

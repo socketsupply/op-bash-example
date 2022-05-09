@@ -13,6 +13,7 @@
   },
   "scripts": [
     "bin/ipc",
+    "bin/stdin",
     "bin/watch",
     "src/main.sh",
     "build.sh"
@@ -24,7 +25,6 @@
     "README.md"
   ],
   "dependencies": {
-    "jasperes/bash-yaml": "master"
   }
 }
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 ##
-# `op-bash-example` - A simple Operator Framework example written in Bash that makes use of POSIX Named Pipes for IPC request IO
+# `op-bash-example`
 #
 # This file is part of op-bash-example.
 #
@@ -45,6 +45,6 @@ if which entr 2>/dev/null 1>&2; then
   list_files | entr -p echo cp -f /_ "$(realpath "$build")" | while read -r line; do
     echo "will run: $line"
     echo "$line" | bash
-    "$dirname/ipc" send 'window=0&event=refresh&value=""'
+    "$dirname/ipc" send 'index=0&event=refresh&value=""'
   done
 fi

@@ -116,32 +116,35 @@ write () {
     # shellcheck disable=SC2059,SC2068
     printf "ipc://%s?" "$1"
     shift
-    local args=()
-    # shellcheck disable=SC2001,SC2207
-    IFS='&' read -r -d '' -a args < <(echo -ne "$@")
+    while (( $# > 0 )); do
+      local j=0
+      local arg="$1"
+      shift
 
-    for (( i = 0; i < ${#args[@]}; ++i )); do
-      local arg="${args[$i]}"
-      local kv=()
-      IFS='=' read -r -d '' -a kv < <(echo -ne "$arg")
+      for (( j = 0; j < ${#arg}; j++ )); do
+        if [ "${arg:$j:1}" == "=" ]; then
+          break
+        fi
+      done
 
-      local key="${kv[0]}"
-      local value="${kv[1]}"
+      local key="${arg:0:(( $j + 1 ))}"
+      local value="${arg:(( $j + 1))}"
 
       echo -ne "$key"
-      echo -ne '='
       echo -ne "$(encode_uri_component "$(echo -ne "$value")")"
+      #echo -ne "$value"
       printf '&'
     done
 
     ## flush
     echo
+  #}
   } > /tmp/op-bash-stdout
 }
 
 init () {
   # shellcheck disable=SC2068
-  write $@ &
+  write "$@" &
   pids+=($!)
 }
 
@@ -149,9 +152,9 @@ signals () {
   trap onsigterm SIGTERM SIGINT
 }
 
-signals || return $?
+signals || exit $?
 # shellcheck disable=SC2068
-init $@ || return $?
-io || return $?
+init "$@" || exit $?
+io || exit $?
 
-wait
+wait || exit $?

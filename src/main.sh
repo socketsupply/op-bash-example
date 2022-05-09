@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 ##
-# `op-bash-example` - A simple Operator Framework example written in Bash that makes use of POSIX Named Pipes for IPC request IO
+# `op-bash-example`
 #
 # This file is part of op-bash-example.
 #
@@ -114,9 +114,9 @@ init () {
   sleep 1s
 
   ## init window
-  write "show" "window=0"
-  write "menu" "window=0&value=$MENU"
-  write "navigate" "window=0&value=file://$dirname/index.html"
+  write "show" "index=0"
+  write "menu" "index=0&value=$MENU"
+  write "navigate" "index=0&value=file://$dirname/index.html"
 
   ## kill previous pids
   killpids

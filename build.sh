@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 ##
-# `op-bash-example` - A simple Operator Framework example written in Bash that makes use of POSIX Named Pipes for IPC request IO
+# `op-bash-example`
 #
 # This file is part of op-bash-example.
 #

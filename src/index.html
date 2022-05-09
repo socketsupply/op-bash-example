@@ -1,23 +1,94 @@
+<!---
+`op-bash-example`
+
+This file is part of op-bash-example.
+
+MIT License
+
+Copyright (c) 2022 Socket Supply Co.
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+SPDX-License-Identifier: MIT
+SPDX-FileCopyrightText: 2022 Socket Supply Co. <socketsupply.co>
+-->
+<!doctype html>
 <html>
   <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-    <title>Bash Hello World</title>
+    <title>Program</title>
     <style type="text/css" media="all">
       body {
-        background: white;
+        background: #000;
+        padding: 0;
+        margin: 0;
+        width: 100%;
+        height: 100%;
+      }
+
+      #terminal {
+        display: block;
+        position: relative;
+        padding: 4px;
+        width: calc(100% - 8px);
       }
     </style>
-    <script charset="utf-8" type="text/javascript">
-      window.addEventListener('refresh', () => { window.location.reload() })
-      window.addEventListener('data', ({ detail }) => {
-        console.log(detail)
-        const pre = document.getElementById('message')
-        pre.textContent = JSON.stringify(detail, null, ' ')
-      })
-    </script>
+    <script charset="utf-8" type="text/javascript" src="https://unpkg.com/xterm@3.0.1/dist/xterm.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/xterm@3.0.1/dist/xterm.css" type="text/css" />
   </head>
   <body>
-    Hello, World from Bash!
-    <pre id="message"></pre>
+    <div id="terminal"></div>
+    <script charset="utf-8">
+      const element = document.getElementById('terminal')
+      const terminal = new Terminal({
+        allowTransparency: true,
+        fontSize: 14,
+        cols: 120,
+      })
+
+      terminal.open(element)
+
+      window.addEventListener('terminal:stdin', onstdin)
+      window.addEventListener('window:refresh', () => {
+        window.location.reload()
+      })
+
+      function decode (data) {
+        return decodeURIComponent(escape(window.atob(data)))
+      }
+
+      function onstdin ({ detail }) {
+        if (typeof detail === 'string') {
+          const lines = decode(detail).split('\n')
+
+          requestAnimationFrame(() => {
+            terminal.reset()
+            terminal.clear()
+          })
+
+          for (const line of lines) {
+            requestAnimationFrame(() => {
+              terminal.writeln(line)
+            })
+          }
+        }
+      }
+    </script>
   </body>
 </html>
